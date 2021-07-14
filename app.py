@@ -1,8 +1,9 @@
 from flask import Flask, url_for, request, redirect
 from predictor import split_pic, analyse
 from tensorflow import keras
+
 app = Flask(__name__)  # __main__
-model = keras.models.load_model('./model/Model_tf.net')
+model = keras.models.load_model('./model/model_10000')
 
 
 @app.route("/")
@@ -38,6 +39,7 @@ def upload_file():
         </form>
         '''
 
+
 @app.route('/api', methods=['POST'])
 def api():
     if request.method == 'POST':
@@ -45,8 +47,15 @@ def api():
         result = analyse(stream, model)
         return "".join(result)
 
+
 if __name__ == "__main__":
     from gevent.pywsgi import WSGIServer
+
     # app.run()
-    http_server = WSGIServer(('localhost',5000),app)
+    http_server = WSGIServer(('0.0.0.0', 5000), app)
     http_server.serve_forever()
+
+
+# 云函数入口
+def handler(environ, start_response):
+    return app(environ, start_response)
